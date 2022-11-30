@@ -22,6 +22,7 @@ import os
 from util.add_watermark import watermark_image
 from util.norm import SpecificNorm
 from parsing_model.model import BiSeNet
+import time
 
 def lcm(a, b): return abs(a * b) / fractions.gcd(a, b) if a and b else 0
 
@@ -35,6 +36,7 @@ def _totensor(array):
     img = tensor.transpose(0, 1).transpose(0, 2).contiguous()
     return img.float().div(255)
 if __name__ == '__main__':
+    start_time = time.perf_counter()
     opt = TestOptions().parse()
 
     start_epoch, epoch_iter = 1, 0
@@ -102,9 +104,12 @@ if __name__ == '__main__':
         else:
             net =None
 
-        reverse2wholeimage(b_align_crop_tenor_list, swap_result_list, b_mat_list, crop_size, img_b_whole, logoclass, \
+        reverse2wholeimage(b_align_crop_tenor_list, swap_result_list, b_mat_list, crop_size, img_b_whole, logoclass,
             os.path.join(opt.output_path, 'result_whole_swapsingle.jpg'), opt.no_simswaplogo,pasring_model =net,use_mask=opt.use_mask, norm = spNorm)
 
         print(' ')
 
         print('************ Done ! ************')
+        end_time = time.perf_counter()
+        total_time = end_time - start_time
+        print(f'function {func.__name__} took {total_time:.3f} seconds')

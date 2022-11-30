@@ -82,7 +82,6 @@ class Face_detect_crop:
         #         kps = kpss[i]
         #     M, _ = face_align.estimate_norm(kps, crop_size, mode ='None') 
         #     align_img = cv2.warpAffine(img, M, (crop_size, crop_size), borderValue=0.0)
-
         det_score = bboxes[..., 4]
 
         # select the face with the hightest detection score
@@ -91,7 +90,11 @@ class Face_detect_crop:
         kps = None
         if kpss is not None:
             kps = kpss[best_index]
-        M, _ = face_align.estimate_norm(kps, crop_size, mode = self.mode) 
+        # print('-' * 30)
+        # print(kps)
+        # print('-' * 30)
+        M, _ = face_align.estimate_norm(kps, crop_size, mode = self.mode)
+
         align_img = cv2.warpAffine(img, M, (crop_size, crop_size), borderValue=0.0)
         
         return [align_img], [M]

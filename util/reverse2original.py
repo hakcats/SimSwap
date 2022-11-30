@@ -1,9 +1,11 @@
 import cv2
 import numpy as np
-# import  time
+import  time
 import torch
 from torch.nn import functional as F
 import torch.nn as nn
+from facexlib.utils.face_restoration_helper import FaceRestoreHelper
+from basicsr.utils import img2tensor, tensor2img
 
 
 def encode_segmentation_rgb(segmentation, no_neck=True):
@@ -85,6 +87,8 @@ def reverse2wholeimage(b_align_crop_tenor_list,swaped_imgs, mats, crop_size, ori
     # print(len(swaped_imgs))
     # print(mats)
     # print(len(b_align_crop_tenor_list))
+    i = 0
+    swap_res_list = []
     for swaped_img, mat ,source_img in zip(swaped_imgs, mats,b_align_crop_tenor_list):
         swaped_img = swaped_img.cpu().detach().numpy().transpose((1, 2, 0))
         img_white = np.full((crop_size,crop_size), 255, dtype=float)
@@ -113,7 +117,7 @@ def reverse2wholeimage(b_align_crop_tenor_list,swaped_imgs, mats, crop_size, ori
                 target_mask = cv2.resize(tgt_mask, (crop_size,  crop_size))
                 # print(source_img)
                 target_image_parsing = postprocess(swaped_img, source_img[0].cpu().detach().numpy().transpose((1, 2, 0)), target_mask,smooth_mask)
-                
+
 
                 target_image = cv2.warpAffine(target_image_parsing, mat_rev, orisize)
                 # target_image_parsing = cv2.warpAffine(swaped_img, mat_rev, orisize)
@@ -161,14 +165,14 @@ def reverse2wholeimage(b_align_crop_tenor_list,swaped_imgs, mats, crop_size, ori
 
         img_mask_list.append(img_mask)
         target_image_list.append(target_image)
-        
+
 
     # target_image /= 255
     # target_image = 0
     img = np.array(oriimg, dtype=np.float)
     for img_mask, target_image in zip(img_mask_list, target_image_list):
         img = img_mask * target_image + (1-img_mask) * img
-        
+
     final_img = img.astype(np.uint8)
     if not no_simswaplogo:
         final_img = logoclass.apply_frames(final_img)
